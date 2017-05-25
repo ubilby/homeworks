@@ -19,19 +19,11 @@ def from10toN(x, n=2, prefix = 0):
         y //= m    #останется остаток, меньший этого числа 
     listch.append(str(y)) #создаем список последнего результата деления и остатков от деления
     
-    for i, j in enumerate(listch):  #для систем разрядности выше десяти
-        if j == "10":               #переименновываем значения
-            listch[i] = "a"
-        elif j == "11":
-            listch[i] = "b"
-        elif j == "12":
-            listch[i] = "c"
-        elif j == "13":
-            listch[i] = "d"
-        elif j == "14":
-            listch[i] = "e"
-        elif j == "15":
-            listch[i] = "f"
+    #для систем разрядности выше десяти переименновываем значения
+    bukvy16 = {"10" : "a", "11" : "b" , "12" : "c", "13" : "d", "14" : "e", "15" : "f"}
+    for i, j in enumerate(listch):
+        if j in bukvy16:
+            listch[i] = bukvy16[j]    
             
     listch = listch[::-1] #развораыиваем полученный список
     if prefix == 1:
@@ -66,20 +58,10 @@ def fromNto10(x, n=2, prefix = 0):
         listch = list(x[::-1])
 
     m=int()
-
+    bukvy16 = {"a" : 10, "b" : 11, "c" : 12, "d" : 13, "e" : 14, "f" : 15}
     for i, j in enumerate(listch):
-        if j == "a":               
-            listch[i] = "10"
-        elif j == "b":
-            listch[i] = "11"
-        elif j == "c":
-            listch[i] = "12"
-        elif j == "d":
-            listch[i] = "13"
-        elif j == "e":
-            listch[i] = "14"
-        elif j == "f":
-            listch[i] = "15"
+        if j in bukvy16:
+            listch[i] = bukvy16[j]
             
     for i,j in enumerate(listch):
         m += int(j)*(n**i)
