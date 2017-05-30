@@ -1,8 +1,9 @@
 """Меню ежедневника"""
+import os.path
+import sqlite3
+from funckofmenu import * 
 
-from funckofmenu import *
-
-def menu():
+def menu(conn):
     """функция навигации по ежедневнику"""
     options = [goallist, adddgoal, editgoal, donegoal, restartg, exitmenu]
     pick = ""
@@ -20,8 +21,20 @@ def menu():
             pick=int(pick) -1
         print()
         
-        options[pick]()
+        options[pick](conn)
 
     return print("Check it up")
 
-menu()
+
+            
+
+
+initialize(connect("diary"))
+conn = connect("diary")
+cursor = conn.cursor()
+
+
+menu(conn)
+#conn.commit()
+
+
