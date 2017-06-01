@@ -3,5 +3,5 @@ CREATE TABLE IF NOT EXISTS diary (
     "task" TEXT NOT NULL,
     "text" TEXT NOT NULL,
     "deadline" DATETIME NOT NULL,
-    "status" TEXT DEFAULT 'Не выполнено'
+    "status" INTEGER DEFAULT 0
 )
