@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS diary (
-    "Номер" INTEGER PRIMARY KEY AUTOINCREMENT,
-    "Задача" TEXT NOT NULL,
-    "Комментарий" TEXT NOT NULL DEFAULT '',
-    "Статус" TEXT DEFAULT 'Не выполнено',
-    "ДатаСоздания" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+    "task" TEXT NOT NULL,
+    "text" TEXT NOT NULL,
+    "deadline" DATETIME NOT NULL,
+    "status" TEXT DEFAULT 'Не выполнено'
 )
