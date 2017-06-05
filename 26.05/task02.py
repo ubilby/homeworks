@@ -15,6 +15,7 @@ def from10toN(x, n=2):
     
     #для систем разрядности выше десяти переименновываем значения
     bukvy16 = {"10" : "a", "11" : "b" , "12" : "c", "13" : "d", "14" : "e", "15" : "f"}
+
     for i, j in enumerate(listch):
         if j in bukvy16:
             listch[i] = bukvy16[j]    
@@ -35,6 +36,7 @@ def from10to8(x, prefix = 0):
     """Функция - обертка для вычисления перевода числа из десятичной в восьмиричную систему исчесления"""
     if prefix == 1:
         return "0o" + from10toN(x, 8)
+
     else:
         return from10toN(x, 8)
 

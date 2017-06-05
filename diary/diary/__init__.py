@@ -1,6 +1,7 @@
 """Меню ежедневника"""
 import sys
 
+
 from diary import funckofmenu as func
 
 
@@ -11,9 +12,12 @@ def action_add():
 
     goal = input("Введите текст задачи: ")
     comment = input("Напишите комментарий: ")
-    deadline = [i for i in input("Введите дату для записи формате 'ГГГГ ММ ДД' через пробел: ").split()]
-    print()
-    deadline = "-".join(deadline)
+    deadline = func.of_date()
+    
+    if not deadline:
+        print("Ошибка! Дата указана не корректно")
+        return
+
     with get_connection() as conn:
         func.add_goal(conn, goal, comment, deadline)
    
@@ -34,8 +38,12 @@ def action_view_all():
 def action_view_for_day():
     """Вывести список невыполненных задач на указанную дату"""
     
-    data_filter = input("введите дату в формате ГГГГ ММ ДД через пробел, по которой хотите получить записи (пустой ввод = сегодня)\n").split()
-    data_filter = "-".join(data_filter)
+    data_filter = func.of_date()
+
+    if not data_filter:
+        print("Ошибка. некорректно указана дата!")
+
+    
     with get_connection() as conn:
         tasks = func.find_goals_by_date(conn, data_filter)
         if not tasks:
@@ -49,9 +57,11 @@ def action_edit():
     pk = input("Введите уникальный номер задачи, которую требуется отредактировать:\n")
     with get_connection() as conn:
         goal = func.find_task_by_pk(conn, pk)
+
         if not goal:
             print("Нет записи под таким номером")
             return
+
         print("{goal[id]} : {goal[task]} : {goal[text]} : {goal[deadline]} : {goal[OTHER]}".format(goal=goal))
 
     actions = {
@@ -77,8 +87,6 @@ m. Выйти в основное меню
             break
 
     actions[action](conn, pk)
-    with get_connection() as conn:
-        edit_well_done = func.find_task_by_pk(conn, pk)
 
 
 def action_finish(): 
@@ -106,6 +114,7 @@ def action_restart():
 
         func.restart(conn, pk)
         func.edit_date(conn, pk)
+    print("задача перезапущена")
 
     
 def exitmenu():
@@ -116,6 +125,8 @@ def exitmenu():
 def show_menu():
     """Показать Меню"""
     print("""
+Diary v0.9 - учебнйы ежедневник
+
 1. Вывести список задач на указанную дату
 2. Вывести список всех задач
 3. Отредактировать задачу
@@ -128,7 +139,6 @@ q. Выход
           
 def menu(): #для такой функции обычно используется имя main, 
     """функция навигации по ежедневнику"""
-
     with get_connection() as conn:
         func.initialize(conn)    
     
@@ -153,3 +163,5 @@ def menu(): #для такой функции обычно использует�
 
         else:
             print("{}? Нет такой команды!\n".format(pick))
+
+

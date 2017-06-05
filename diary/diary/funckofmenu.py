@@ -1,13 +1,14 @@
 import sqlite3
 import os.path as Path
+import datetime
 
 SQL_INSERT_GOAL = """
-            INSERT INTO diary ("task","text","deadline") VALUES (?, ?, ?)
+            INSERT INTO diary (task, text, deadline) VALUES (?, ?, ?)
             """
 
 SQL_SELECT_ALL = """
     SELECT
-        "id", "task", "text", "deadline",
+        id, task, text, deadline,
     CASE (status)
         WHEN 1
         THEN "Выполнено"
@@ -15,18 +16,6 @@ SQL_SELECT_ALL = """
         END "OTHER"
     FROM
         diary
-"""
-
-SQL_SELECT_ALL_BY_DATE_TODAY = """
-    SELECT
-        "id", "task", "text", "deadline",
-    CASE (status)
-        WHEN 1
-        THEN "Выполнено"
-        ELSE "Не выполнено"
-        END "OTHER"
-    FROM
-        diary WHERE deadline = DATE('NOW')
 """
 
 SQL_EDIT_GOAL = """
@@ -119,32 +108,36 @@ def find_all_goals(conn):
 
 
 def find_goals_by_date(conn, deadline = None):
-    """Выводит список невыполненных задач на указанную дату"""    
-    if deadline:
-        with conn:
-            cursor = conn.execute(SQL_SELECT_ALL + " WHERE status = 0 AND deadline = DATE(?)", (deadline,))
-            return cursor.fetchall()
-
-    else:
-        with conn:
-            cursor = conn.execute(SQL_SELECT_ALL + " WHERE status = 0 AND deadline = DATE('NOW')")       
-            return cursor.fetchall()
+    """принимает подключание и дату. Выводит список невыполненных задач на указанную дату"""    
+    with conn:
+        cursor = conn.execute(SQL_SELECT_ALL + " WHERE status = 0 AND deadline = DATE(?)", (deadline,))
+        return cursor.fetchall()
 
     
 def finish(conn, pk):
-    """завершает задачу"""
+    """принимает подключение и номер записи, меняет статус на выполнено"""
     with conn:
         cursor = conn.execute(SQL_EDIT_STATUS_OFF, (pk,))
+    print("Задача завершена")
 
 
 def restart(conn, pk):
-    """перезапускает задачу"""
+    """принимает подключение и номер записи, меняет статус на не выполнено"""
     with conn:
         cursor = conn.execute(SQL_EDIT_STATUS_ON, (pk,))
     
-    
 
-def is_date_ok():
-    pass
-#в __all__ переданы только названия функций, а имена sql-запросов - нет, но ошибок использования этих имен при запуске main.py - нет.
-#нужно еще разобраться с датой (настроить часовой пояс +3)
+def of_date():
+    
+    try:
+        date = [int(i) for i in input("Введите дату в формате ГГГГ ММ ДД (по-умолчанию - сегодня): ").split()]
+
+        if not date:
+            return datetime.date.isoformat(datetime.date.today())
+
+        test = datetime.date(*date)
+
+    except (ValueError, TypeError):
+        return False
+
+    return datetime.date.isoformat(test)
