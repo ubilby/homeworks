@@ -1,40 +1,36 @@
 """Меню ежедневника"""
 import sys
-
+from collections import OrderedDict, namedtuple
 
 from diary import funckofmenu as func
 
 
 get_connection = lambda: func.connect("diary.sqlite") #тоже самое, что и предыдущее создание функции (закоментированное) 
 
-def action_add():
-    """Добавить задачу"""
+Action = namedtuple("Action", ["func", "name"])
+actions = OrderedDict()
 
-    goal = input("Введите текст задачи: ")
-    comment = input("Напишите комментарий: ")
-    deadline = func.of_date()
-    
-    if not deadline:
-        print("Ошибка! Дата указана не корректно")
-        return
 
-    with get_connection() as conn:
-        func.add_goal(conn, goal, comment, deadline)
-   
-    print("Задача добавлена")
+def action(cmd, name):
+    def decorator(func):
+        actions[cmd] = Action(func = func, name = name)
+        return func
+    return decorator
     
 
+@action("1", "Вывести список всех задач")
 def action_view_all():
     """Вывести список всех задач"""
     with get_connection() as conn:
         urls = func.find_all_goals(conn)
 
         for url in urls:
-            print("{url[id]} : {url[task]} : {url[text]} : {url[deadline]} : {url[OTHER]}".format(url=url))
+            print("{url[id]} : {url[task]} : {url[text]} : {url[deadline]} : {url[OTHER]}\n".format(url=url))
         
     print("\nСписок задач выведен")
 
 
+@action("2", "Вывести список невыполненных задач на указанную дату")
 def action_view_for_day():
     """Вывести список невыполненных задач на указанную дату"""
     
@@ -52,6 +48,7 @@ def action_view_for_day():
             print("{lines[id]} : {lines[task]} : {lines[text]} : {lines[deadline]} : {lines[OTHER]}".format(lines=lines))
 
 
+@action("3", "Отредактировать задачу")
 def action_edit():
     """Отредактировать задачу"""
     pk = input("Введите уникальный номер задачи, которую требуется отредактировать:\n")
@@ -70,7 +67,7 @@ def action_edit():
         "3" : func.edit_date
         }
     
-    while True:
+    while True: #Это нагромождение строк через принт - нужно заменить декораторами!
         action = input("""
 1. Изменить формулировку цели
 2. Переписать коментарий к задаче
@@ -89,6 +86,7 @@ m. Выйти в основное меню
     actions[action](conn, pk)
 
 
+@action("4", "Завершить задачу")
 def action_finish(): 
     """Завершить задачу"""
     pk = input("Введите уникальный номер завершенной задачи:\n")
@@ -101,7 +99,7 @@ def action_finish():
 
         func.finish(conn, pk)
  
-
+@action("5", "Перезапустить задачу")
 def action_restart():
     """Перезапустить задачу"""
     pk = input("Введите уникальный номер завершенной задачи:\n")
@@ -116,50 +114,50 @@ def action_restart():
         func.edit_date(conn, pk)
     print("задача перезапущена")
 
+
+@action("6", "Добавить задачу")
+def action_add():
+    """Добавить задачу"""
+    goal = input("Введите текст задачи: ")
+    comment = input("Напишите комментарий: ")
+    deadline = func.of_date()
     
+    if not deadline:
+        print("Ошибка! Дата указана не корректно")
+        return
+
+    with get_connection() as conn:
+        func.add_goal(conn, goal, comment, deadline)
+   
+    print("Задача добавлена")    
+
+
+@action("q", "Выйти")    
 def exitmenu():
     """Выход"""
     sys.exit(0)
 
 
+@action("m", "Показать меню")
 def show_menu():
     """Показать Меню"""
-    print("""
-Diary v0.9 - учебнйы ежедневник
+    print("Diary v0.9 - учебнйы ежедневник")
+    for cmd, action in actions.items(): # интерпритатор пробегает по меню, считывает декораторы и создает словарь действий
+        print("{}.{}".format(cmd, action[1])) #это список кортежей - пара (ключ, згначение) и выводит список
 
-1. Вывести список задач на указанную дату
-2. Вывести список всех задач
-3. Отредактировать задачу
-4. Завершить задачу
-5. Начать задачу сначала
-6. Добавить задачу
-q. Выход
-""")
-
-          
+              
 def menu(): #для такой функции обычно используется имя main, 
     """функция навигации по ежедневнику"""
     with get_connection() as conn:
         func.initialize(conn)    
     
-    options = {
-        "1" : action_view_for_day,
-        "2" : action_view_all,
-        "3" : action_edit,
-        "4" : action_finish,
-        "5" : action_restart,
-        "6" : action_add,
-        "q" : exitmenu,
-        }
-    
     while 1:
         show_menu()
-        pick = input("Для продолжения работы выберете действие: \n")
-        action = options.get(pick)
+        pick = input("\nДля продолжения работы выберете действие: \n")
+        action = actions.get(pick)
         
         if action:
-            print("\n" + action.__doc__+"\n")
-            action()
+            actions[pick][0]()
 
         else:
             print("{}? Нет такой команды!\n".format(pick))
