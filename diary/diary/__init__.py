@@ -51,6 +51,9 @@ def action_view_for_day():
 @action("3", "Отредактировать задачу")
 def action_edit():
     """Отредактировать задачу"""
+    EditAction = namedtuple("Action", ["func", "name"])
+    EditActions = OrderedDict()
+    
     pk = input("Введите уникальный номер задачи, которую требуется отредактировать:\n")
     with get_connection() as conn:
         goal = func.find_task_by_pk(conn, pk)
@@ -61,29 +64,21 @@ def action_edit():
 
         print("{goal[id]} : {goal[task]} : {goal[text]} : {goal[deadline]} : {goal[OTHER]}".format(goal=goal))
 
-    actions = {
-        "1" : func.edit_goal,
-        "2" : func.edit_comment,
-        "3" : func.edit_date
-        }
-    
-    while True: #Это нагромождение строк через принт - нужно заменить декораторами!
-        action = input("""
-1. Изменить формулировку цели
-2. Переписать коментарий к задаче
-3. Изменить дату выполнения задачи
-m. Выйти в основное меню
-""")
-        if action == "m":
+        for cmd, action in funckofmenu.EditActions.items(): # интерпритатор пробегает по меню, считывает декораторы и создает словарь действий
+            print("{}.{}".format(cmd, action[1])) #это список кортежей - пара (ключ, згначение) и выводит список
+
+        pick = input("Выберете действие: ")
+        edit_action = funckofmenu.EditActions.get(pick)
+        
+        if pick == "m":
             return
     
-        if action not in actions:
-            continue
+        if edit_action:
+            funckofmenu.EditActions[pick][0](conn, pk)
 
         else:
-            break
-
-    actions[action](conn, pk)
+            print("{}? Нет такой команды!\n".format(pick))
+            return
 
 
 @action("4", "Завершить задачу")

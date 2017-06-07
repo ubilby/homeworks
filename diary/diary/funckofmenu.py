@@ -2,6 +2,8 @@ import sqlite3
 import os.path as Path
 import datetime
 
+from collections import OrderedDict, namedtuple
+
 SQL_INSERT_GOAL = """
             INSERT INTO diary (task, text, deadline) VALUES (?, ?, ?)
             """
@@ -38,6 +40,19 @@ SQL_EDIT_STATUS_ON = """
             UPDATE diary SET status = 0 WHERE id = (?)
 """
 
+
+
+EditAction = namedtuple("Action", ["func", "name"])
+EditActions = OrderedDict()
+
+
+def edit_action(cmd, name):
+    def decorator(func):
+        EditActions[cmd] = EditAction(func = func, name = name)
+        return func
+    return decorator
+
+
 def dict_factory(cursor, row):
     d = {}
     for idx, col in enumerate(cursor.description):
@@ -64,20 +79,14 @@ def initialize(conn):
         conn.executescript(f.read())
 
 
+
 def add_goal(conn, goal, comment, deadline):
     """Принимает цель, комментарий и дату выполнения. Добавляет соответствующую запись в таблицу.""" 
     with conn:
         cursor = conn.execute(SQL_INSERT_GOAL, (goal, comment, deadline,))
     return 
 
-
-def edit_comment(conn, pk):
-    """Функция изменяет комментарий указанной записи по ее номеру"""
-    comment = input("Ппрокомментируйте задачу заново:\n")
-    with conn:
-        cursor = conn.execute(SQL_EDIT_COMMENTS, (comment, pk,))
-
-
+@edit_action("1", "Изменить задачу")
 def edit_goal(conn, pk):
     """Функция изменяет цель в записи по номеру"""
     goal = input("Введите новую формулировку задачи:\n")
@@ -85,6 +94,15 @@ def edit_goal(conn, pk):
         cursor = conn.execute(SQL_EDIT_GOAL, (goal, pk,))
 
         
+@edit_action("2", "Изменить комментарий")
+def edit_comment(conn, pk):
+    """Функция изменяет комментарий указанной записи по ее номеру"""
+    comment = input("Ппрокомментируйте задачу заново:\n")
+    with conn:
+        cursor = conn.execute(SQL_EDIT_COMMENTS, (comment, pk,))
+
+
+@edit_action("3", "Изменить дату")        
 def edit_date(conn, pk):
     """Функция изменяет дату по id"""
     new_date = input("Введите новую дату в формате ГГГГ ММ ДД (через пробел):\n").split()
