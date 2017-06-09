@@ -13,20 +13,18 @@ def pause(seconds):
             print("pause on")
             time.sleep(seconds)
             print("pause off")
-            result = func(*args, **kwargs)
-           
-
-            return result
+            return func(*args, **kwargs)
         
         return wrapper
 
     return decorator
+
 
 @pause(5)
 def func():
     n=0
 
     while n < 100:
-        print(n)
+        print(n, end = " ")
         n += 1
 func()
