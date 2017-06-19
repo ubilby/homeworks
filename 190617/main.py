@@ -121,7 +121,13 @@ class PickleParamHandler(ParamHandler):
         Запись в формате pickle параметров self.params
         """
         with open(name, "wb") as f:
-            pickle.dump(self.params, f) 
+            pickle.dump(self.params, f)
+
+
+ParamHandler.add_type("txt", TextParamHandler)
+ParamHandler.add_type("xml", XmlParamHandler)
+ParamHandler.add_type("json", JsonParamHandler)
+ParamHandler.add_type("pickle", PickleParamHandler)
 
 config = ParamHandler.get_instance('./params.json')
 config.add_param('key1', 'val1')
@@ -139,7 +145,3 @@ config.read("params.pickle")
 
 
 
-ParamHandler.add_type("txt", TextParamHandler)
-ParamHandler.add_type("xml", XmlParamHandler)
-ParamHandler.add_type("json", JsonParamHandler)
-ParamHandler.add_type("pickle", PickleParamHandler)
