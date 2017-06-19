@@ -96,9 +96,10 @@ class JsonParamHandler(ParamHandler):
         """
         Чтение в формате JSON и присвоение значений в self.params
         """
-        with open(self.source) as f: #json любит словари, все ключи - обязательно в кавычках, нет None, но есть Null
-            print("\nДанные прочитаны из json файла: {}\n".format(json.load(f)))
-
+        with open(self.source) as f:
+            a = json.load(f)
+            for i in a:
+                self.params[i] = a[i]
 
     def write(self):
         """
@@ -114,8 +115,10 @@ class PickleParamHandler(ParamHandler):
         Чтение в формате pickle и присвоение значений в self.params
         """
         with open(self.source, "rb") as f:
-            print("\nДанные прочитаны из pickle файла: {}\n".format(pickle.load(f)))
-
+            a = pickle.load(f)
+            for i in a:
+                self.params[i] = a[i]
+            
     def write(self):
         """
         Запись в формате pickle параметров self.params
@@ -142,6 +145,4 @@ config.add_param('key2', 'val2')
 config.add_param('key3', 'val3')
 config.write()
 config.read()
-
-
 
